@@ -1,25 +1,28 @@
+// IBL
 uniform samplerCube             u_cubeMap;
+uniform vec3                    u_SH[9];
 
+// Shadow
 uniform sampler2D               u_lightShadowMap;
 uniform mat4                    u_lightMatrix;
 uniform vec3                    u_light;
 uniform vec3                    u_lightColor;
-uniform vec3                    u_SH[9];
 uniform float                   u_lightIntensity;
+varying vec4                    v_lightCoord;
 
+// Scene
 uniform vec3                    u_camera;
 uniform vec2                    u_resolution;
 uniform float                   u_time;
-uniform int                     u_frame;
 
-varying vec4                    v_lightCoord;
+// Model
 varying vec4                    v_position;
 varying vec4                    v_color;
 varying vec3                    v_normal;
 varying vec2                    v_texcoord;
 
-#define SCENE_SH_ARRAY          u_SH
-#define SCENE_CUBEMAP           u_cubeMap
+// #define SCENE_SH_ARRAY          u_SH
+// #define SCENE_CUBEMAP           u_cubeMap
 // #define IBL_IMPORTANCE_SAMPLING
 
 #define CAMERA_POSITION         u_camera
@@ -55,10 +58,8 @@ varying vec2                    v_texcoord;
 #include "lygia/draw/colorChecker.glsl"
 #include "lygia/space/lookAt.glsl"
 
-#ifndef BACKGROUND
 #include "lygia/lighting/material/new.glsl"
 #include "lygia/lighting/pbr.glsl"
-#endif
 
 void main() {
     vec4 color = vec4(vec3(0.0), 1.0);
@@ -92,7 +93,6 @@ void main() {
     #endif
 
     color = pbr(material);
-
     color = rgb2srgb(color);
 
     gl_FragColor = color;

@@ -26,7 +26,6 @@ varying vec2    v_texcoord;
 #define COLOR_ATTRIBUTE     color
 #define NORMAL_ATTRIBUTE    normal
 #define TEXCOORD_ATTRIBUTE  uv
-
 #define MODEL_MATRIX        modelMatrix
 #define VIEW_MATRIX         viewMatrix
 #define PROJECTION_MATRIX   projectionMatrix
@@ -88,11 +87,11 @@ void main(void) {
     v_color = COLOR_ATTRIBUTE;
     #endif
 
-    #if defined(FLOOR)
+    #if defined(FLOOR) && defined(PLATFORM_WEBGL)
     v_position.xz *= vec2(2.0, 2.0);
     float z = 1.0-(v_position.z * 0.1 + 0.25);
-    float y = pow(z, 12.0);
-    v_position.y += y * 0.5;
+    v_position.y += pow(z, 12.0) * 0.5;
+
     #endif
 
 #if defined(DEVLOOK_SPHERE_0) || defined(DEVLOOK_SPHERE_1) || defined(DEVLOOK_BILLBOARD_0)
@@ -110,7 +109,7 @@ void main(void) {
     mat4 V = mat4(1.0);
     float S = 0.65;
     #else
-    mat4 V = inverse( toMat4( lookAt(normalize(u_camera), vec3(0.0), vec3(0.0, -1.0, 0.0)) ) );
+    mat4 V = inverse( toMat4( lookAt(normalize(u_camera), vec3(0.0), vec3(0.0, 1.0, 0.0)) ) );
     float S = 0.25;
     #endif
 
