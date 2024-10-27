@@ -1,0 +1,35 @@
+{
+    "name": "devlook",
+    "version": "1.0.0",
+    "description": "DevLook",
+    "main": "index.html",
+    "private": true,
+    "author": "Patricio Gonzalez Vivo <patriciogonzalezvivo@gmail.com>",
+    "scripts": {
+        "start": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:patriciogonzalezvivo/stripe_wave.git"
+    },
+    "licenses": [
+        {
+            "type": "Patron License",
+            "url": "https://lygia.xyz/license"
+        }
+    ],
+    "homepage": "https://github.com/ShaderCamp/sponsorware",
+    "bugs": {
+        "url": "https://github.com/ShaderCamp/sponsorware/issues"
+    },
+    "devDependencies": {
+        "vite": "^4.4.9",
+        "vite-plugin-glsl": "^1.1.2"
+    },
+    "dependencies": {
+        "glsl-pipeline": "^3.0.0",
+        "three": "^0.169.0"
+    }
+}
