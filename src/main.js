@@ -1,7 +1,6 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { LightProbeHelper } from 'three/addons/helpers/LightProbeHelper.js';
 import { LightProbeGenerator } from 'three/addons/lights/LightProbeGenerator.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
@@ -27,20 +26,7 @@ renderer.shadowMap.enabled = true;
 // renderer.toneMapping = THREE.ACESFilmicToneMapping;
 D.body.appendChild(renderer.domElement);
 
-let uniforms = {
-    u_cubeMap: { type: "t", value: null },
-    u_SH: { type: "vec3", value:[
-        new THREE.Vector3(0.0, 0.0, 0.0), 
-        new THREE.Vector3(0.0, 0.0, 0.0),
-        new THREE.Vector3(0.0, 0.0, 0.0),
-        new THREE.Vector3(0.0, 0.0, 0.0),
-        new THREE.Vector3(0.0, 0.0, 0.0),
-        new THREE.Vector3(0.0, 0.0, 0.0),
-        new THREE.Vector3(0.0, 0.0, 0.0),
-        new THREE.Vector3(0.0, 0.0, 0.0),
-        new THREE.Vector3(0.0, 0.0, 0.0),
-    ]},
-};
+let uniforms = {};
 
 // GLSL Buffers
 const glsl_pipeline = new GlslPipeline(renderer, uniforms);
@@ -55,32 +41,12 @@ controls.update();
 // Scene
 const scene = new THREE.Scene();
 
-const cubeRenderTarget = new THREE.WebGLCubeRenderTarget( 256 );
-let cubeCamera = new THREE.CubeCamera( 1, 1000, cubeRenderTarget );
-cubeCamera.position.set(0, 1, 0);
-let lightProbe;
+// Scene: IBL
+glsl_pipeline.setCubemap("assets/little_paris_eiffel_tower_2k.hdr", scene);
+scene.background = uniforms.u_cubeMap.value;
+scene.environment = uniforms.u_cubeMap.value;
 
-new RGBELoader()
-    .setPath( 'assets/' )
-    .load( 'little_paris_eiffel_tower_2k.hdr', function ( texture ) {
-        texture.mapping = THREE.EquirectangularReflectionMapping;
-        texture.encoding = THREE.RGBEEncoding;
-        texture.flipY = true;
-
-        scene.background = texture;
-        scene.environment = texture;
-        uniforms.u_cubeMap.value = texture;
-
-        cubeCamera.update( renderer, scene );
-        const probe = LightProbeGenerator.fromCubeRenderTarget( renderer, cubeRenderTarget );
-        probe.then( ( p ) => { 
-            lightProbe = p;
-            uniforms.u_SH.value = lightProbe.sh.coefficients;
-            uniforms.u_cubeMap.value = cubeRenderTarget.texture;
-        } );
-    } );
-
-// Scene, Lights
+// Scene: Lights
 const light = new THREE.DirectionalLight(0xffffff, 1.0);
 light.position.set(0, 10, 8);
 light.lookAt(0, 0, 0);
@@ -92,7 +58,7 @@ light.shadow.camera.far = 20;
 scene.add(light);
 glsl_pipeline.setLight(light);
 
-// Scene, Floor
+// Scene: Floor
 const floor = new THREE.PlaneGeometry(5, 5, 1, 36);
 floor.rotateX(-Math.PI * 0.5);
 floor.translate(0, -0.7, 0);
@@ -101,7 +67,7 @@ floorMesh.castShadow = false;
 floorMesh.receiveShadow = true;
 scene.add(floorMesh);
 
-// Scene, devlook
+// Scene: devlook
 const devlook_sphere_0 = new THREE.Mesh(new THREE.IcosahedronGeometry(1,200), glsl_pipeline.branchMaterial("DEVLOOK_SPHERE_0"));
 scene.add(devlook_sphere_0);
 
@@ -112,7 +78,7 @@ const devlook_billboard_0 = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), glsl_p
 devlook_billboard_0.material.transparent = true;
 scene.add(devlook_billboard_0);
 
-// Scene, Mesh
+// Scene: Mesh
 const objLoader = new OBJLoader();
 objLoader.load(
     'assets/dragon.obj',
@@ -155,3 +121,5 @@ W.addEventListener("resize", resize);
 resize();
 
 draw();
+
+// window.gp = glsl_pipeline; // for debugging

@@ -3,5 +3,8 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
     build: { sourcemap: true },
-    plugins: [glsl()]
+    plugins: [glsl()],
+    optimizeDeps: {
+        exclude: ['glsl-pipeline']
+    }
 });

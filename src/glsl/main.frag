@@ -11,7 +11,6 @@ uniform float                   u_lightIntensity;
 varying vec4                    v_lightCoord;
 
 // Scene
-uniform vec3                    u_camera;
 uniform vec2                    u_resolution;
 uniform float                   u_time;
 
@@ -21,11 +20,10 @@ varying vec4                    v_color;
 varying vec3                    v_normal;
 varying vec2                    v_texcoord;
 
-// #define SCENE_SH_ARRAY          u_SH
-// #define SCENE_CUBEMAP           u_cubeMap
+#define SCENE_SH_ARRAY          u_SH
+#define SCENE_CUBEMAP           u_cubeMap
 // #define IBL_IMPORTANCE_SAMPLING
 
-#define CAMERA_POSITION         u_camera
 #define SURFACE_POSITION        v_position
 
 #define LIGHT_DIRECTION         u_light
@@ -34,21 +32,27 @@ varying vec2                    v_texcoord;
 #define LIGHT_INTENSITY         u_lightIntensity
 
 #ifdef PLATFORM_WEBGL
+#define CAMERA_POSITION         cameraPosition
+
 #define MODEL_VERTEX_NORMAL     v_normal
 #define MODEL_VERTEX_TEXCOORD   v_texcoord
 #define MODEL_VERTEX_TANGENT    v_tangent
 #define MODEL_VERTEX_COLOR      v_color
-#endif
 
-#include "lygia/math/unpack.glsl"
-#define SAMPLERSHADOW_FNC(TEX, UV) unpack(SAMPLER_FNC(TEX, UV))
-#define SHADOWMAP_BIAS 0.1
+#include <packing>
+
+#define SAMPLERSHADOW_FNC(TEX, UV) unpackRGBAToDepth(SAMPLER_FNC(TEX, UV))
+#define SHADOWMAP_BIAS 0.0
+
+#else
+
+uniform vec3                    u_camera;
+#define CAMERA_POSITION         u_camera
+
+#endif
 
 // #include "lygia/lighting/atmosphere.glsl"
 // #define ENVMAP_FNC(NORM, ROUGHNESS, METALLIC) atmosphere(NORM, normalize(LIGHT_DIRECTION))
-
-// #include "lygia/sample/equirect.glsl"
-// #define ENVMAP_FNC(NORM, ROUGHNESS, METALLIC) srgb2rgb(sampleEquirect(u_tex0, NORM, 1.0 + 26.0 * ROUGHNESS).rgb)
 
 #include "lygia/math/saturate.glsl"
 #include "lygia/space/ratio.glsl"

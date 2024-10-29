@@ -26,6 +26,7 @@ varying vec2    v_texcoord;
 #define COLOR_ATTRIBUTE     color
 #define NORMAL_ATTRIBUTE    normal
 #define TEXCOORD_ATTRIBUTE  uv
+#define CAMERA_UP           vec3(0.0, -1.0, 0.0)
 #define MODEL_MATRIX        modelMatrix
 #define VIEW_MATRIX         viewMatrix
 #define PROJECTION_MATRIX   projectionMatrix
@@ -56,13 +57,14 @@ attribute vec3              NORMAL_ATTRIBUTE;
 attribute vec2              TEXCOORD_ATTRIBUTE;
 #endif
 
+#define CAMERA_UP           vec3(0.0, 1.0, 0.0)
 #define MODEL_MATRIX        u_modelMatrix
 #define VIEW_MATRIX         u_viewMatrix
 #define PROJECTION_MATRIX   u_projectionMatrix
+
 #endif
 
 #include "lygia/math/const.glsl"
-#include "lygia/math/powFast.glsl"
 #include "lygia/math/toMat4.glsl"
 #include "lygia/math/inverse.glsl"
 #include "lygia/space/lookAt.glsl"
@@ -109,7 +111,7 @@ void main(void) {
     mat4 V = mat4(1.0);
     float S = 0.65;
     #else
-    mat4 V = inverse( toMat4( lookAt(normalize(u_camera), vec3(0.0), vec3(0.0, 1.0, 0.0)) ) );
+    mat4 V = inverse( toMat4( lookAt(normalize(u_camera), vec3(0.0), CAMERA_UP) ) );
     float S = 0.25;
     #endif
 
