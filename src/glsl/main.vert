@@ -20,16 +20,27 @@ varying vec2    v_texcoord;
 
 #ifdef PLATFORM_WEBGL
 
-// ThreeJS 
+// Match ThreeJS attributes
 #define POSITION_ATTRIBUTE  vec4(position,1.0)
 #define TANGENT_ATTRIBUTE   tangent
 #define COLOR_ATTRIBUTE     color
 #define NORMAL_ATTRIBUTE    normal
 #define TEXCOORD_ATTRIBUTE  uv
-#define CAMERA_UP           vec3(0.0, -1.0, 0.0)
+
+// match ThrreeJS uniforms
 #define MODEL_MATRIX        modelMatrix
 #define VIEW_MATRIX         viewMatrix
 #define PROJECTION_MATRIX   projectionMatrix
+#if defined(DEVLOOK_SPHERE_0) || defined(DEVLOOK_SPHERE_1)
+// The 2 spheres (dialectic/metallic) have camera at a constant distance
+#define CAMERA_POSITION     (normalize(cameraPosition) * 3.0)
+#elif defined(DEVLOOK_BILLBOARD_0)
+// The color check billboard has a fixed camera
+#define CAMERA_POSITION     vec3(0.0, 0.0, 3.0) 
+#else
+#define CAMERA_POSITION     cameraPosition
+#endif
+#define CAMERA_UP           vec3(0.0, -1.0, 0.0)
 
 #else
 
@@ -55,6 +66,16 @@ attribute vec3              NORMAL_ATTRIBUTE;
 #ifdef MODEL_VERTEX_TEXCOORD
 #define TEXCOORD_ATTRIBUTE  a_texcoord
 attribute vec2              TEXCOORD_ATTRIBUTE;
+#endif
+
+#if defined(DEVLOOK_SPHERE_0) || defined(DEVLOOK_SPHERE_1)
+// The 2 spheres (dialectic/metallic) have camera at a constant distance
+#define CAMERA_POSITION     (normalize(u_camera) * 3.0)
+#elif defined(DEVLOOK_BILLBOARD_0)
+// The color check billboard has a fixed camera
+#define CAMERA_POSITION     vec3(0.0, 0.0, 3.0) 
+#else
+#define CAMERA_POSITION     u_camera
 #endif
 
 #define CAMERA_UP           vec3(0.0, 1.0, 0.0)
@@ -98,26 +119,26 @@ void main(void) {
 
 #if defined(DEVLOOK_SPHERE_0) || defined(DEVLOOK_SPHERE_1) || defined(DEVLOOK_BILLBOARD_0)
 
+    // This is for the 2 spheres (dialectic/metallic) and the color checker billboard
+    //
     #ifdef LIGHT_SHADOWMAP
     v_lightCoord = vec4(0.0);
     #endif
 
-    float area = 2.0;
-    mat4 P = orthographic(  area, -area, 
-                            area, -area, 
-                            -1.0, 5.0);
+    const float area = 2.0;
+    mat4 P = orthographic( area, -area, area, -area, -1.0, 5.0);
 
     #if defined(DEVLOOK_BILLBOARD_0)
+    // The billboards have an orthogonal projection
     mat4 V = mat4(1.0);
     float S = 0.65;
     #else
-    mat4 V = inverse( toMat4( lookAt(normalize(u_camera), vec3(0.0), CAMERA_UP) ) );
+    mat4 V = inverse( toMat4( lookAt(CAMERA_POSITION, vec3(0.0), CAMERA_UP) ) );
     float S = 0.25;
     #endif
 
     gl_Position = P * V * POSITION_ATTRIBUTE;
-    float aspect = u_resolution.y / u_resolution.x;
-    gl_Position.xy *= vec2(aspect, 1.0) * S;
+    gl_Position.xy *= vec2(u_resolution.y / u_resolution.x, 1.0) * S;
     gl_Position.x -= 0.8;
 
     #if defined(DEVLOOK_SPHERE_0)
@@ -130,6 +151,8 @@ void main(void) {
 
 #else
 
+    // This is for the main model
+    //
     v_position = MODEL_MATRIX * v_position;
     #if defined(LIGHT_SHADOWMAP)
     v_lightCoord = u_lightMatrix * v_position;

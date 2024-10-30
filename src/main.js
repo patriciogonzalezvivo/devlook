@@ -1,9 +1,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { LightProbeGenerator } from 'three/addons/lights/LightProbeGenerator.js';
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';  
 
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
@@ -23,7 +21,6 @@ const renderer = new THREE.WebGLRenderer( { antialias: true } );
 renderer.setPixelRatio(pixelRatio);
 renderer.setSize(width, height);
 renderer.shadowMap.enabled = true;
-// renderer.toneMapping = THREE.ACESFilmicToneMapping;
 D.body.appendChild(renderer.domElement);
 
 let uniforms = {};
@@ -43,8 +40,6 @@ const scene = new THREE.Scene();
 
 // Scene: IBL
 glsl_pipeline.setCubemap("assets/little_paris_eiffel_tower_2k.hdr", scene);
-scene.background = uniforms.u_cubeMap.value;
-scene.environment = uniforms.u_cubeMap.value;
 
 // Scene: Lights
 const light = new THREE.DirectionalLight(0xffffff, 1.0);
@@ -67,13 +62,9 @@ floorMesh.castShadow = false;
 floorMesh.receiveShadow = true;
 scene.add(floorMesh);
 
-// Scene: devlook
-const devlook_sphere_0 = new THREE.Mesh(new THREE.IcosahedronGeometry(1,200), glsl_pipeline.branchMaterial("DEVLOOK_SPHERE_0"));
-scene.add(devlook_sphere_0);
-
-const devlook_sphere_1 = new THREE.Mesh(new THREE.IcosahedronGeometry(1,200), glsl_pipeline.branchMaterial("DEVLOOK_SPHERE_1"));
-scene.add(devlook_sphere_1);
-
+// Scene: 2 spheres (dialectic/metallic) and color checker billboards
+scene.add(new THREE.Mesh(new THREE.IcosahedronGeometry(1,200), glsl_pipeline.branchMaterial("DEVLOOK_SPHERE_0")));
+scene.add(new THREE.Mesh(new THREE.IcosahedronGeometry(1,200), glsl_pipeline.branchMaterial("DEVLOOK_SPHERE_1")));
 const devlook_billboard_0 = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), glsl_pipeline.branchMaterial("DEVLOOK_BILLBOARD_0"));
 devlook_billboard_0.material.transparent = true;
 scene.add(devlook_billboard_0);
@@ -119,7 +110,4 @@ const resize = () => {
 
 W.addEventListener("resize", resize);
 resize();
-
 draw();
-
-// window.gp = glsl_pipeline; // for debugging
