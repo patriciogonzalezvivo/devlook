@@ -18,6 +18,8 @@ varying vec4    v_color;
 varying vec3    v_normal;
 varying vec2    v_texcoord;
 
+#define LOOK_AT_RIGHT_HANDED
+
 #ifdef PLATFORM_WEBGL
 
 // Match ThreeJS attributes
